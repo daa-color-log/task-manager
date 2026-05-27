@@ -1,4 +1,4 @@
-# Enterprise Task & Calendar Management System
+# Task & Calendar Management System
 
 이 프로젝트는 웹 브라우저의 로컬 스토리지를 활용하여 업무와 일정을 효율적으로 관리할 수 있는 **웹 기반 통합 태스크 관리 시스템**입니다. 별도의 서버 구축 없이 즉시 실행 가능하며, 직관적인 UI와 강력한 필터링 기능을 제공합니다.
 
