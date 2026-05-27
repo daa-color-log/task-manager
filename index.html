@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task & Calendar Management System</title>
+    <style>
+        /* Base Reset & Colors */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333e4f;
+            line-height: 1.6;
+            padding: 50px 20px;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(165, 175, 190, 0.15);
+            padding: 45px;
+        }
+
+        /* Header & Progress Section */
+        header {
+            border-bottom: 1px solid #e9eff6;
+            padding-bottom: 28px;
+            margin-bottom: 25px;
+        }
+
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            color: #1e2e4a;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .lang-switcher-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fafbfc;
+            padding: 6px 12px;
+            border-radius: 30px;
+            border: 1px solid #dbe2ed;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .lang-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #7987a1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .lang-select {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 20px 0 0 !important;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2b4c7e;
+            cursor: pointer;
+            outline: none !important;
+            width: auto !important;
+        }
+
+        header label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6c7a9c;
+        }
+
+        .progress-container {
+            background-color: #edf2f9;
+            border-radius: 25px;
+            position: relative;
+            height: 16px;
+            width: 100%;
+            margin-top: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #4a779d, #3182ce);
+            height: 100%;
+            width: 0%;
+            border-radius: 25px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-text {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            font-weight: 700;
+            color: #1a365d;
+        }
+
+        /* View Tabs Navigation */
+        .view-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #e1e8f2;
+            padding-bottom: 0;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #7987a1;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s ease;
+            position: relative;
+            top: 1px;
+        }
+
+        .tab-btn:hover {
+            color: #2b4c7e;
+            background-color: #f0f4f9;
+        }
+
+        .tab-btn.active {
+            color: #2b4c7e;
+            background-color: #ffffff;
+            border: 1px solid #e1e8f2;
+            border-bottom: 1px solid #ffffff;
+            font-weight: 700;
+        }
+
+        /* Form Layout */
+        .task-form {
+            background: #fafbfc;
+            border: 1px solid #e9edf3;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 30px;
+        }
+
+        .form-group { margin-bottom: 18px; }
+        .form-row { display: flex; gap: 18px; margin-bottom: 18px; }
+        .form-row .form-group { flex: 1; margin-bottom: 0; }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #5c687a;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"], input[type="date"], textarea, select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #dbe2ed;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333e4f;
+            background-color: #ffffff;
+            transition: all 0.15s ease;
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #7ba2cd;
+            box-shadow: 0 0 0 3px rgba(123, 162, 205, 0.15);
+        }
+
+        /* Color Picker Styling */
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        input[type="color"] {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid #cbd5e0;
+            width: 44px;
+            height: 38px;
+            border-radius: 8px;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 7px; }
+
+        /* Dual Progress Form */
+        .range-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #ffffff;
+            padding: 8px 14px;
+            border: 1px solid #dbe2ed;
+            border-radius: 8px;
+        }
+
+        /* 슬라이더: 8 비율 */
+        input[type="range"] {
+            flex: 8; 
+            accent-color: #4a779d;
+            cursor: pointer;
+        }
+
+        /* 숫자 입력창: 2 비율 */
+        .num-progress-input {
+            flex: 2;
+            width: 100%; /* 부모의 2만큼 공간을 채움 */
+            padding: 6px 8px;
+            text-align: right;
+            font-weight: bold;
+            color: #2b4c7e;
+            box-sizing: border-box; /* 패딩이 전체 크기에 포함되도록 설정 */
+        }
+        
+        .btn-submit {
+            background-color: #2b4c7e;
+            color: #ffffff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s ease;
+        }
+        .btn-submit:hover { background-color: #1e355b; }
+
+        /* Control Dashboard (Filters & Live-Search) */
+        .control-dashboard {
+            background: #f0f4f8;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #e1e9f1;
+            margin-bottom: 30px;
+        }
+
+        .control-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            color: #4e5d78;
+        }
+
+        .filter-select {
+            padding: 7px 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 13px;
+            background: #ffffff;
+            cursor: pointer;
+            min-width: 130px;
+        }
+
+        .data-toolbar { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background-color: #ffffff;
+            color: #4e5d78;
+            border: 1px solid #cbd5e1;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+
+        .btn-secondary:hover { 
+            background-color: #fafbfc; 
+            border-color: #a4b3cc;
+        }
+        
+        #csvFileInput { 
+            display: none !important; 
+        }
+        
+        .search-wrapper { width: 100%; }
+        .search-input { 
+            width: 100%; 
+            padding: 12px 16px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            font-size: 13px; 
+            background: #ffffff; 
+        }
+
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* Task List & Cards */
+        .task-list { display: flex; flex-direction: column; gap: 18px; }
+        
+        .task-card {
+            border: 1px solid #e6ecf4;
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            background-color: #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 6px solid #cbd5e0; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+        }
+        .task-card:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(113, 128, 150, 0.1);
+        }
+
+        /* Checkbox */
+        .checkbox-container { display: flex; align-items: center; margin-top: 3px; }
+        .todo-checkbox {
+            appearance: none; -webkit-appearance: none;
+            width: 22px; height: 22px; border: 2px solid #cbd5e1; border-radius: 6px;
+            outline: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            background: #ffffff; transition: all 0.15s ease;
+        }
+        .todo-checkbox:checked { background-color: #4a9d77; border-color: #4a9d77; }
+        .todo-checkbox:checked::before { content: "✓"; color: white; font-size: 14px; font-weight: bold; }
+
+        .task-content { flex: 1; min-width: 0; } 
+        .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 15px; }
+        .task-title { font-size: 17px; font-weight: 700; color: #1e2e4a; word-break: break-all; }
+        .task-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+        /* Badges */
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        .badge-high { background-color: #fee2e2; color: #ef4444; }
+        .badge-medium { background-color: #ffedd5; color: #ea580c; }
+        .badge-low { background-color: #f1f5f9; color: #64748b; }
+
+        .status-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .status-todo { background-color: #f1f5f9; color: #64748b; }
+        .status-doing { background-color: #e0f2fe; color: #0369a1; }
+        .status-hold { background-color: #fef3c7; color: #b45309; }
+        .status-done { background-color: #dcfce7; color: #15803d; }
+
+        .task-desc { font-size: 14px; color: #64748b; margin-bottom: 14px; white-space: pre-line; }
+
+        /* Mini Task Progress */
+        .card-progress-section { margin-bottom: 14px; }
+        .mini-progress-label { font-size: 11px; font-weight: 600; color: #64748b; display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .mini-progress-bg { background-color: #f1f5f9; height: 6px; border-radius: 10px; width: 100%; overflow: hidden; }
+        .mini-progress-fill { background-color: #5c8cb3; height: 100%; width: 0%; transition: width 0.3s ease; }
+        .task-card.completed .mini-progress-fill { background-color: #4a9d77; }
+
+        .task-details-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px; font-size: 13px; background: #fafbfc; padding: 12px 16px;
+            border-radius: 8px; margin-bottom: 14px; border: 1px solid #f0f4f8;
+        }
+        .details-item span { font-weight: 600; color: #4e5d78; }
+        .task-url { color: #3182ce; text-decoration: none; word-break: break-all; }
+        .task-url:hover { text-decoration: underline; }
+
+        .task-footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; }
+        .info-tag { background-color: #f1f5f9; color: #334155; padding: 3px 8px; border-radius: 6px; font-family: monospace; font-weight: 700; }
+        
+        .action-btns { display: flex; gap: 14px; }
+        .btn-action { background: none; border: none; cursor: pointer; font-size: 13px; font-weight: 600; }
+        .btn-edit { color: #4a779d; }
+        .btn-edit:hover { text-decoration: underline; }
+        .btn-delete { color: #ef4444; }
+        .btn-delete:hover { text-decoration: underline; }
+
+        /* 완료 카드 스타일 */
+        .task-card.completed { 
+            background-color: #fafbfc; 
+            border-color: #e6ecf4 !important;
+        }
+        .task-card.completed .task-title { text-decoration: line-through; color: #94a3b8; }
+        
+        .task-card.completed .collapsible-body {
+            display: none; 
+            margin-top: 14px;
+            width: 100%;
+        }
+        
+        .task-card.completed.expanded .collapsible-body {
+            display: block;
+        }
+
+        .btn-toggle-view {
+            background: #ffffff;
+            border: 1px solid #dbe2ed;
+            color: #4e5d78;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: none; 
+            white-space: nowrap; 
+            transition: all 0.15s ease;
+        }
+        .btn-toggle-view:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .task-card.completed .btn-toggle-view {
+            display: inline-block; 
+        }
+
+        /* Native Calendar Gantt Component Style */
+        .calendar-scroll-area {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .calendar-wrapper { 
+            background: #ffffff; 
+            border: 1px solid #e6ecf4; 
+            border-radius: 12px; 
+            padding: 25px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.01); 
+            min-width: 800px; 
+        }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+        .calendar-nav-btn { background-color: #ffffff; border: 1px solid #dbe2ed; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; color: #4e5d78; }
+        .calendar-nav-btn:hover { background-color: #fafbfc; border-color: #cbd5e1; }
+        .calendar-title { font-size: 18px; font-weight: 700; color: #1e2e4a; }
+
+        .calendar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            border-top: 1px solid #e1e8f2; 
+            border-left: 1px solid #e1e8f2; 
+            background-color: #e1e8f2; 
+            gap: 1px; 
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .calendar-weekday { 
+            background-color: #fafbfc; 
+            text-align: center; 
+            font-weight: 600; 
+            font-size: 13px; 
+            padding: 12px 0; 
+            color: #64748b; 
+        }
+        .calendar-weekday:nth-child(7n+1) { color: #ef4444; } 
+        .calendar-weekday:nth-child(7n) { color: #3b82f6; }   
+
+        .calendar-cell { 
+            min-height: 140px; 
+            background-color: #ffffff; 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 8px 0; 
+        }
+        .calendar-cell.other-month { background-color: #fdfdfe; }
+        .calendar-cell.other-month .cell-number { color: #cbd5e1; }
+        
+        .cell-number { 
+            font-size: 12px; 
+            font-weight: 700; 
+            color: #64748b; 
+            margin-bottom: 6px; 
+            padding-left: 8px; 
+        }
+
+        .calendar-item-block {
+            font-size: 11px; 
+            padding: 5px 8px; 
+            cursor: pointer; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap;
+            font-weight: 700; 
+            height: 24px; 
+            line-height: 14px; 
+            position: relative; 
+            z-index: 5;
+            width: 100%;
+            margin-bottom: 3px;
+            color: #2d3748;
+            border-left: 4px solid rgba(0,0,0,0.15); 
+        }
+        
+        .bar-start { margin-left: 4px; border-top-left-radius: 5px; border-bottom-left-radius: 5px; width: calc(100% - 4px); }
+        .bar-end { margin-right: 4px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; width: calc(100% - 4px); }
+        .bar-start.bar-end { margin-left: 4px; margin-right: 4px; width: calc(100% - 8px); }
+
+        .calendar-spacer-block { height: 24px; background: transparent; pointer-events: none; margin-bottom: 3px; }
+
+        /* Modal Popup Style */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(30, 46, 74, 0.45); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000;
+            padding: 15px;
+        }
+        
+        .modal-box { 
+            background: #ffffff !important; 
+            border-radius: 12px !important; 
+            width: 100% !important; 
+            max-width: 580px !important; 
+            padding: 35px !important; 
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important; 
+            max-height: 90vh; 
+            overflow-y: auto;
+            border: 1px solid #e2e8f0 !important;
+        }
+        
+        .modal-box .form-group { margin-bottom: 18px !important; display: block !important; width: 100% !important; }
+        .modal-box .form-row { display: flex !important; flex-direction: row !important; gap: 18px !important; margin-bottom: 18px !important; width: 100% !important; }
+        .modal-box .form-row .form-group { flex: 1 !important; margin-bottom: 0 !important; }
+        .modal-box label { color: #2d3748 !important; font-weight: 600 !important; margin-bottom: 8px !important; display: block !important; font-size: 13px !important; text-align: left !important; }
+        .modal-box input, .modal-box select, .modal-box textarea { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; color: #333e4f !important; padding: 11px 14px !important; border-radius: 8px !important; font-size: 14px !important; width: 100% !important; display: block !important; }
+        .modal-box input:focus, .modal-box select:focus, .modal-box textarea:focus { border-color: #7ba2cd !important; box-shadow: 0 0 0 3px rgba(123, 162, 205, 0.15) !important; }
+
+        .modal-header { font-size: 18px; font-weight: bold; color: #1e2e4a; margin-bottom: 22px; border-bottom: 1px solid #edf2f7; padding-bottom: 10px; text-align: left; }
+        .modal-footer { display: flex !important; justify-content: flex-end !important; gap: 10px !important; margin-top: 22px !important; border-top: 1px solid #edf2f7; padding-top: 15px; width: 100% !important; }
+
+        /* Responsive Layout Media Queries */
+        @media screen and (max-width: 768px) {
+            body { padding: 15px 10px; }
+            .container { padding: 20px 15px; border-radius: 12px; }
+            .header-top-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+            h1 { font-size: 20px; }
+            
+            .form-row { flex-direction: column; gap: 0; }
+            .form-row .form-group { margin-bottom: 18px; }
+            .modal-box .form-row { flex-direction: column !important; gap: 0 !important; }
+            .modal-box .form-row .form-group { margin-bottom: 18px !important; }
+            
+            .control-top-row { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .filter-section { width: 100%; flex-direction: column; align-items: flex-start; gap: 12px; }
+            .filter-group { width: 100%; justify-content: space-between; }
+            .filter-select { width: 65%; min-width: auto; }
+            .data-toolbar { width: 100%; justify-content: flex-end; gap: 8px; }
+            .btn-secondary { flex: 1; justify-content: center; padding: 10px; font-size: 12px; }
+            
+            .task-details-grid { grid-template-columns: 1fr; gap: 6px; }
+            .task-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .task-footer { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .action-btns { width: 100%; justify-content: flex-end; }
+            
+            .modal-box { padding: 25px 15px !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-top-row">
+            <h1 id="txtMainTitle">할 일 & 일정 관리 시스템</h1>
+            <div class="lang-switcher-group">
+                <span class="lang-label">Lang:</span>
+                <select id="langSelect" class="lang-select" onchange="changeLanguage(this.value)">
+                    <option value="ko" selected>한국어</option>
+                    <option value="ja">日本語</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+        </div>
+        <label id="txtGlobalProgress">전체 평균 진행률 (Overall Progress)</label>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+            <span class="progress-text" id="progressText">0%</span>
+        </div>
+    </header>
+
+    <div class="view-tabs">
+        <button class="tab-btn active" id="btnListViewTab" onclick="switchView('list')">할 일 목록</button>
+        <button class="tab-btn" id="btnCalViewTab" onclick="switchView('calendar')">캘린더 화면</button>
+    </div>
+
+    <div id="listViewSection" class="view-section active">
+        <section class="task-form">
+            <form id="taskForm" onsubmit="addTask(event)">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label id="lblFormTitle">할 일 명 (제목) *</label>
+                        <input type="text" id="title" required placeholder="예: Nginx 설정 파일 수정">
+                    </div>
+                    <div class="form-group">
+                        <label id="lblFormStatus">진행 상태</label>
+                        <select id="status" onchange="syncStatusToProgress('add')">
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label id="lblFormProgressRange">개별 진행률 (슬라이더 또는 수치 입력)</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="taskProgress" min="0" max="100" value="0" oninput="syncProgressToStatus('add', 'range')">
+                        <input type="number" id="taskProgressNum" min="0" max="100" value="0" class="num-progress-input" oninput="syncProgressToStatus('add', 'number')">
+                        <span style="font-weight: bold; color: #2b4c7e;">%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label id="lblFormDesc">상세 내용</label>
+                    <textarea id="desc" placeholder="할 일의 구체적인 절차나 메모를 입력하세요"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label id="lblFormAssignee">담당자</label>
+                        <input type="text" id="assignee" placeholder="예: 홍길동">
+                    </div>
+                    <div class="form-group">
+                        <label id="lblFormDueDate">마감일 (일정 종료일)</label>
+                        <input type="date" id="dueDate">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1.5;">
+                        <label id="lblFormCategory">카테고리</label>
+                        <input type="text" id="category" placeholder="예: 인프라, 개발, 공통">
+                    </div>
+                    <div class="form-group">
+                        <label id="lblFormColor">색상 선택</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="taskColor" value="#e2e8f0">
+                            <span id="txtColorSubText" style="font-size: 12px; color: #718096;">커스텀 색상</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label id="lblFormPriority">우선순위</label>
+                        <select id="priority">
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1.5;">
+                        <label id="lblFormUrl">관련 URL</label>
+                        <input type="text" id="url" placeholder="https://github.com/... ">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="btnFormSubmit">추가하기</button>
+            </form>
+        </section>
+
+        <div class="control-dashboard">
+            <div class="control-top-row">
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label id="lblFilterStatus">상태 필터:</label>
+                        <select id="filterStatus" class="filter-select" onchange="renderAll()">
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label id="lblFilterPriority">우선순위 필터:</label>
+                        <select id="filterPriority" class="filter-select" onchange="renderAll()">
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label id="lblFilterCategory">카테고리:</label>
+                        <select id="filterCategory" class="filter-select" onchange="renderAll()">
+                            <option value="all">전체 보기</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="data-toolbar">
+                    <button class="btn-secondary" onclick="exportToCSV()" id="btnExportCSV">CSV 내보내기</button>
+                    <button class="btn-secondary" onclick="document.getElementById('csvFileInput').click()" id="btnImportCSV">CSV 가져오기</button>
+                    <input type="file" id="csvFileInput" accept=".csv" onchange="importFromCSV(event)">
+                </div>
+            </div>
+            
+            <div class="search-wrapper">
+                <input type="text" id="taskSearchInput" class="search-input" placeholder="제목, 상세 내용 또는 담당자 이름으로 실시간 검색..." oninput="renderAll()">
+            </div>
+        </div>
+
+        <main class="task-list" id="taskList"></main>
+    </div>
+
+    <div id="calendarViewSection" class="view-section">
+        <div class="calendar-scroll-area">
+            <div class="calendar-wrapper">
+                <div class="calendar-header">
+                    <button class="calendar-nav-btn" id="btnCalPrev" onclick="moveMonth(-1)">이전 달</button>
+                    <div class="calendar-title" id="calendarMonthTitle">2026년 05월</div>
+                    <button class="calendar-nav-btn" id="btnCalNext" onclick="moveMonth(1)">다음 달</button>
+                </div>
+                <div class="calendar-grid" id="calendarGridBody"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <div class="modal-header" id="txtModalHeader">정보 수정</div>
+        <input type="hidden" id="editId">
+        
+        <div class="form-group">
+            <label id="lblModalTitle">할 일 명 *</label>
+            <input type="text" id="editTitle" required>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label id="lblModalStatus">진행 상태</label>
+                <select id="editStatus" onchange="syncStatusToProgress('edit')">
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="lblModalPriority">우선순위</label>
+                <select id="editPriority">
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label id="lblModalProgress">개별 진행률 (슬라이더 또는 수치 입력)</label>
+            <div class="range-wrapper">
+                <input type="range" id="editProgress" min="0" max="100" oninput="syncProgressToStatus('edit', 'range')">
+                <input type="number" id="editProgressNum" min="0" max="100" class="num-progress-input" oninput="syncProgressToStatus('edit', 'number')">
+                <span style="font-weight: bold; color: #2b4c7e;">%</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label id="lblModalDesc">상세 내용</label>
+            <textarea id="editDesc"></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label id="lblModalAssignee">담당자</label>
+                <input type="text" id="editAssignee">
+            </div>
+            <div class="form-group">
+                <label id="lblModalDueDate">마감일 (일정 종료일)</label>
+                <input type="date" id="editDueDate">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label id="lblModalCategory">카테고리</label>
+                <input type="text" id="editCategory">
+            </div>
+            <div class="form-group">
+                <label id="lblModalColor">색상 수정</label>
+                <div class="color-picker-wrapper">
+                    <input type="color" id="editColor">
+                </div>
+            </div>
+            <div class="form-group" style="flex: 2;">
+                <label id="lblModalUrl">관련 URL</label>
+                <input type="text" id="editUrl">
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-secondary" id="btnModalCancel" onclick="closeEditModal()">취소</button>
+            <button class="btn-submit" id="btnModalSave" style="width: auto;" onclick="updateTaskSubmit()">변경사항 저장</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const i18n = {
+        ko: {
+            mainTitle: "할 일 & 일정 관리 시스템", globalProgress: "전체 평균 진행률 (Overall Progress)",
+            listTab: "할 일 목록", calTab: "캘린더 화면",
+            formTitle: "할 일 명 (제목) *", formStatus: "진행 상태", formProgress: "개별 진행률 (슬라이더 또는 수치 입력)",
+            formDesc: "상세 내용", formAssignee: "담당자", formDueDate: "마감일 (일정 종료일)",
+            formCategory: "카테고리", formColor: "색상 선택", formPriority: "우선순위", formUrl: "관련 URL",
+            formSubmit: "추가하기", filterStatus: "상태 필터:", filterPriority: "우선순위 필터:", filterCategory: "카테고리:",
+            exportCSV: "CSV 내보내기", importCSV: "CSV 가져오기", searchPlaceholder: "제목, 상세 내용 또는 담당자 이름으로 실시간 검색...",
+            modalHeader: "정보 수정", btnSave: "변경사항 저장", btnCancel: "취소",
+            phTitle: "예: Nginx 설정 파일 수정", phDesc: "할 일의 구체적인 절차나 메모를 입력하세요", phAssignee: "예: 홍길동", phCategory: "예: 인프라, 개발, 공통",
+            statusAll: "전체 보기", priorityAll: "전체 보기", defaultTag: "일반", colorSub: "커스텀 색상",
+            todo: "미착수 (To Do)", doing: "진행중 (In Progress)", hold: "보류됨 (On Hold)", done: "완료됨 (Done)",
+            low: "낮음 (Low)", medium: "보통 (Medium)", high: "높음 (High)",
+            lblAssignee: "담당자", lblPeriod: "일정 기간", lblCategory: "카테고리", lblRegistered: "등록일", btnEdit: "수정", btnDelete: "삭제",
+            alertDelete: "이 항목을 정말로 삭제하시겠습니까?", alertImportConfirm: "건의 데이터를 시스템으로 가져오시겠습니까?", alertNoData: "내보낼 데이터가 없습니다.",
+            txtNoCard: "조건에 해당하는 할 일이 없습니다.", calPrev: "이전 달", calNext: "다음 달", weekdays: ['일', '월', '화', '수', '목', '금', '토'],
+            btnExpand: "내용 보기", btnCollapse: "내용 접기"
+        },
+        ja: {
+            mainTitle: "業務タスク＆スケジュール管理システム", globalProgress: "全体の平均進捗率 (Overall Progress)",
+            listTab: "タスクリスト", calTab: "カレンダー",
+            formTitle: "タスク名 (タイトル) *", formStatus: "ステータス", formProgress: "個別進捗率 (スライダー or 数値入力)",
+            formDesc: "詳細内容", formAssignee: "担当者", formDueDate: "期限 (スケジュール終了日)",
+            formCategory: "カテゴリ", formColor: "タスクカラー選択", formPriority: "優先度", formUrl: "関連URL",
+            formSubmit: "タスクを追加する", filterStatus: "ステータス:", filterPriority: "優先度:", filterCategory: "カテゴリ:",
+            exportCSV: "CSVエクスポート", importCSV: "CSVインポート", searchPlaceholder: "タスク名、詳細内容、または担当者でリアルタイム検索...",
+            modalHeader: "タスクの編集", btnSave: "変更を保存", btnCancel: "キャンセル",
+            phTitle: "例: Nginx設定ファイルの修正", phDesc: "詳細な手順やメモを入力してください", phAssignee: "例: 山田太郎", phCategory: "例: インフラ, 開発",
+            statusAll: "全て表示", priorityAll: "全て表示", defaultTag: "一般", colorSub: "カスタム色",
+            todo: "未着手 (To Do)", doing: "進行中 (In Progress)", hold: "保留 (On Hold)", done: "完了 (Done)",
+            low: "低 (Low)", medium: "中 (Medium)", high: "高 (High)",
+            lblAssignee: "担当者", lblPeriod: "スケジュール期間", lblCategory: "カテゴリ", lblRegistered: "登録日", btnEdit: "変更", btnDelete: "削除",
+            alertDelete: "このタスクを削除しますか？", alertImportConfirm: "件のデータをインポートしますか？", alertNoData: "エクスポートする data がありません。",
+            txtNoCard: "該当するタスクがありません。", calPrev: "前月", calNext: "翌月", weekdays: ['日', '月', '火', '水', '木', '金', '土'],
+            btnExpand: "詳細表示", btnCollapse: "詳細閉じる"
+        },
+        en: {
+            mainTitle: "Task & Schedule Management System", globalProgress: "Overall Progress Balance",
+            listTab: "Task List", calTab: "Calendar View",
+            formTitle: "Task Name (Title) *", formStatus: "Status", formProgress: "Task Progress (Slider/Input)",
+            formDesc: "Description Details", formAssignee: "Assignee", formDueDate: "Due Date",
+            formCategory: "Category", formColor: "Label Color", formPriority: "Priority", formUrl: "Related URL",
+            formSubmit: "Add Task", filterStatus: "Status:", filterPriority: "Priority:", filterCategory: "Category:",
+            exportCSV: "Export CSV", importCSV: "Import CSV", searchPlaceholder: "Search title, description, or assignee...",
+            modalHeader: "Edit Task Details", btnSave: "Save Changes", btnCancel: "Cancel",
+            phTitle: "e.g., Fix Nginx config structure", phDesc: "Type specific workflow steps...", phAssignee: "e.g., John Doe", phCategory: "e.g., Infrastructure, Dev",
+            statusAll: "Show All", priorityAll: "Show All", defaultTag: "General", colorSub: "Custom Hex", 
+            todo: "To Do", doing: "In Progress", hold: "On Hold", done: "Done",
+            low: "Low", medium: "Medium", high: "High",
+            lblAssignee: "Assignee", lblPeriod: "Timeline", lblCategory: "Category", lblRegistered: "Logged Date", btnEdit: "Edit", btnDelete: "Delete",
+            alertDelete: "Are you sure you want to delete this item?", alertImportConfirm: " tasks found. Import to storage?", alertNoData: "No data available to export.",
+            txtNoCard: "No computational records matching current active queries found.", calPrev: "Prev", calNext: "Next", weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            btnExpand: "Show More", btnCollapse: "Hide Info"
+        }
+    };
+
+    let currentLang = localStorage.getItem('app_lang') || 'ko';
+    let tasks = JSON.parse(localStorage.getItem('business_tasks')) || [];
+    let currentCalendarDate = new Date(); 
+    let currentViewMode = 'list';
+    let expandedCardMap = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initSelectDOMOptions();
+        changeLanguage(currentLang);
+    });
+
+    function initSelectDOMOptions() {
+        buildSelectOptions('status', ['todo', 'doing', 'hold', 'done'], 'todo');
+        buildSelectOptions('editStatus', ['todo', 'doing', 'hold', 'done'], 'todo');
+        buildSelectOptions('filterStatus', ['all', 'todo', 'doing', 'hold', 'done'], 'all');
+        
+        buildSelectOptions('priority', ['low', 'medium', 'high'], 'medium');
+        buildSelectOptions('editPriority', ['low', 'medium', 'high'], 'medium');
+        buildSelectOptions('filterPriority', ['all', 'low', 'medium', 'high'], 'all');
+    }
+
+    function buildSelectOptions(elementId, keysArray, defaultFallbackValue) {
+        const el = document.getElementById(elementId);
+        if(!el) return;
+        el.innerHTML = '';
+        keysArray.forEach(k => {
+            const opt = document.createElement('option');
+            opt.value = k;
+            opt.innerText = k; 
+            el.appendChild(opt);
+        });
+        el.value = defaultFallbackValue;
+    }
+
+    function changeLanguage(langCode) {
+        currentLang = langCode;
+        localStorage.setItem('app_lang', langCode);
+        document.getElementById('langSelect').value = langCode;
+        
+        translateStaticDOM();
+        updateCategoryFilterOptions();
+        renderAll();
+    }
+
+    function translateStaticDOM() {
+        const t = i18n[currentLang];
+        document.getElementById('txtMainTitle').innerText = t.mainTitle;
+        document.getElementById('txtGlobalProgress').innerText = t.globalProgress;
+        document.getElementById('btnListViewTab').innerText = t.listTab;
+        document.getElementById('btnCalViewTab').innerText = t.calTab;
+        
+        document.getElementById('lblFormTitle').innerText = t.formTitle;
+        document.getElementById('title').placeholder = t.phTitle;
+        document.getElementById('lblFormStatus').innerText = t.formStatus;
+        document.getElementById('lblFormProgressRange').innerText = t.formProgress;
+        document.getElementById('lblFormDesc').innerText = t.formDesc;
+        document.getElementById('desc').placeholder = t.phDesc;
+        document.getElementById('lblFormAssignee').innerText = t.formAssignee;
+        document.getElementById('assignee').placeholder = t.phAssignee;
+        document.getElementById('lblFormDueDate').innerText = t.formDueDate;
+        document.getElementById('lblFormCategory').innerText = t.formCategory;
+        document.getElementById('category').placeholder = t.phCategory;
+        document.getElementById('lblFormColor').innerText = t.formColor;
+        document.getElementById('txtColorSubText').innerText = t.colorSub;
+        document.getElementById('lblFormPriority').innerText = t.formPriority;
+        document.getElementById('lblFormUrl').innerText = t.formUrl;
+        document.getElementById('btnFormSubmit').innerText = t.formSubmit;
+
+        document.getElementById('lblFilterStatus').innerText = t.filterStatus;
+        document.getElementById('lblFilterPriority').innerText = t.filterPriority;
+        document.getElementById('lblFilterCategory').innerText = t.filterCategory;
+        document.getElementById('btnExportCSV').innerText = t.exportCSV;
+        document.getElementById('btnImportCSV').innerText = t.importCSV;
+        document.getElementById('taskSearchInput').placeholder = t.searchPlaceholder;
+
+        document.getElementById('txtModalHeader').innerText = t.modalHeader;
+        document.getElementById('lblModalTitle').innerText = t.formTitle;
+        document.getElementById('lblModalStatus').innerText = t.formStatus;
+        document.getElementById('lblModalPriority').innerText = t.formPriority;
+        document.getElementById('lblModalProgress').innerText = t.formProgress;
+        document.getElementById('lblModalDesc').innerText = t.formDesc;
+        document.getElementById('lblModalAssignee').innerText = t.formAssignee;
+        document.getElementById('lblModalDueDate').innerText = t.formDueDate;
+        document.getElementById('lblModalCategory').innerText = t.formCategory;
+        document.getElementById('lblModalColor').innerText = t.formColor;
+        document.getElementById('lblModalUrl').innerText = t.formUrl;
+        document.getElementById('btnModalCancel').innerText = t.btnCancel;
+        document.getElementById('btnModalSave').innerText = t.btnSave;
+
+        document.getElementById('btnCalPrev').innerText = t.calPrev;
+        document.getElementById('btnCalNext').innerText = t.calNext;
+
+        updateSelectOptionsTranslation('status', false);
+        updateSelectOptionsTranslation('editStatus', false);
+        updateSelectOptionsTranslation('filterStatus', true);
+        updateSelectOptionsTranslation('priority', false);
+        updateSelectOptionsTranslation('editPriority', false);
+        updateSelectOptionsTranslation('filterPriority', true);
+    }
+
+    function updateSelectOptionsTranslation(elementId, isFilterDropdown) {
+        const el = document.getElementById(elementId);
+        if(!el) return;
+        Array.from(el.options).forEach(opt => {
+            const k = opt.value;
+            if(isFilterDropdown && k === 'all') opt.innerText = i18n[currentLang].statusAll;
+            else opt.innerText = i18n[currentLang][k] || k;
+        });
+    }
+
+    /* 슬라이더 수치 및 진행 상태 실시간 양방향 싱크 함수 구현 정의 */
+    function syncStatusToProgress(mode) {
+        const prefix = mode === 'edit' ? 'edit' : 'task';
+        const statusId = mode === 'edit' ? 'editStatus' : 'status';
+        const progressId = mode === 'edit' ? 'editProgress' : 'taskProgress';
+        const numId = mode === 'edit' ? 'editProgressNum' : 'taskProgressNum';
+        
+        const currentStatus = document.getElementById(statusId).value;
+        let targetProgress = 0;
+        if(currentStatus === 'done') targetProgress = 100;
+        else if(currentStatus === 'doing') targetProgress = 50;
+        
+        document.getElementById(progressId).value = targetProgress;
+        document.getElementById(numId).value = targetProgress;
+    }
+
+    function syncProgressToStatus(mode, triggerType) {
+        const progressId = mode === 'edit' ? 'editProgress' : 'taskProgress';
+        const numId = mode === 'edit' ? 'editProgressNum' : 'taskProgressNum';
+        const statusId = mode === 'edit' ? 'editStatus' : 'status';
+        
+        let val = 0;
+        if(triggerType === 'range') {
+            val = Number(document.getElementById(progressId).value);
+            document.getElementById(numId).value = val;
+        } else {
+            val = Number(document.getElementById(numId).value);
+            if(val > 100) val = 100; if(val < 0) val = 0;
+            document.getElementById(progressId).value = val;
+        }
+        
+        const statusEl = document.getElementById(statusId);
+        if(val === 100) statusEl.value = 'done';
+        else if(val > 0 && statusEl.value === 'todo') statusEl.value = 'doing';
+        else if(val === 0 && statusEl.value === 'doing') statusEl.value = 'todo';
+    }
+
+    function generateCategoryColor(categoryName) {
+        if(!categoryName || categoryName === '일반' || categoryName === '一般' || categoryName === 'General') return '#e2e8f0';
+        let hash = 0;
+        for (let i = 0; i < categoryName.length; i++) { hash = categoryName.charCodeAt(i) + ((hash << 5) - hash); }
+        const h = Math.abs(hash % 360);
+        return `hsl(${h}, 55%, 85%)`; 
+    }
+
+    function rgbToHex(rgbaStr) {
+        if(!rgbaStr || rgbaStr.startsWith('#')) return rgbaStr || '#e2e8f0';
+        const dummy = document.createElement('div'); dummy.style.color = rgbaStr; document.body.appendChild(dummy);
+        const rgb = window.getComputedStyle(dummy).color; document.body.removeChild(dummy);
+        const sep = rgb.indexOf(",") > -1 ? "," : " "; const rgbArr = rgb.substr(4).split(")")[0].split(sep);
+        let r = (+rgbArr[0]).toString(16), g = (+rgbArr[1]).toString(16), b = (+rgbArr[2]).toString(16);
+        if (r.length == 1) r = "0" + r; if (g.length == 1) g = "0" + g; if (b.length == 1) b = "0" + b;
+        return "#" + r + g + b;
+    }
+
+    function saveToStorage() {
+        localStorage.setItem('business_tasks', JSON.stringify(tasks));
+    }
+
+    function getFilteredTasks() {
+        const fStatus = document.getElementById('filterStatus').value;
+        const fPriority = document.getElementById('filterPriority').value;
+        const fCategory = document.getElementById('filterCategory').value;
+        const searchQuery = document.getElementById('taskSearchInput').value.toLowerCase().trim();
+
+        return tasks.filter(t => {
+            if(fStatus !== 'all' && t.status !== fStatus) return false;
+            if(fPriority !== 'all' && t.priority !== fPriority) return false;
+            if(fCategory !== 'all' && t.category !== fCategory) return false;
+            if(searchQuery) {
+                const titleMatch = t.title ? t.title.toLowerCase().includes(searchQuery) : false;
+                const descMatch = t.desc ? t.desc.toLowerCase().includes(searchQuery) : false;
+                const assigneeMatch = t.assignee ? t.assignee.toLowerCase().includes(searchQuery) : false;
+                return titleMatch || descMatch || assigneeMatch;
+            }
+            return true;
+        });
+    }
+
+    function getStatusLabel(statusKey) {
+        const t = i18n[currentLang];
+        const displayLabel = t[statusKey] || statusKey;
+        return `<span class="status-badge status-${statusKey}">${displayLabel}</span>`;
+    }
+
+    function toggleCardExpand(id) {
+        expandedCardMap[id] = !expandedCardMap[id];
+        renderTasks();
+    }
+
+    function renderAll() {
+        updateProgress();
+        if(currentViewMode === 'list') {
+            renderTasks();
+        } else {
+            renderCalendar();
+        }
+    }
+
+    function addTask(event) {
+        event.preventDefault();
+        try {
+            const titleEl = document.getElementById('title');
+            if(!titleEl || !titleEl.value.trim()) return;
+
+            const statusVal = document.getElementById('status').value || 'todo';
+            const progressVal = Number(document.getElementById('taskProgress').value) || 0;
+            const priorityVal = document.getElementById('priority').value || 'medium';
+            const todayStr = new Date().toISOString().split('T')[0]; 
+            const catVal = document.getElementById('category').value.trim() || i18n[currentLang].defaultTag;
+            
+            let chosenColor = document.getElementById('taskColor').value;
+            if(chosenColor === '#e2e8f0' && catVal !== '일반' && catVal !== '一般' && catVal !== 'General') {
+                chosenColor = rgbToHex(generateCategoryColor(catVal));
+            }
+
+            const newObject = {
+                id: Date.now(), 
+                title: titleEl.value.trim(), 
+                desc: document.getElementById('desc').value || '',
+                status: statusVal, 
+                progress: progressVal, 
+                assignee: document.getElementById('assignee').value || 'N/A',
+                startDate: todayStr, 
+                dueDate: document.getElementById('dueDate').value || '',
+                url: document.getElementById('url').value || '', 
+                priority: priorityVal, 
+                category: catVal, 
+                color: chosenColor, 
+                completed: statusVal === 'done' || progressVal === 100,
+                createdAt: new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : (currentLang === 'ja' ? 'ja-JP' : 'en-US'), { hour: '2-digit', minute: '2-digit' })
+            };
+
+            tasks.push(newObject);
+            saveToStorage(); 
+            updateCategoryFilterOptions();
+            renderAll();
+            
+            document.getElementById('taskForm').reset();
+            document.getElementById('taskColor').value = '#e2e8f0';
+            document.getElementById('taskProgress').value = 0;
+            document.getElementById('taskProgressNum').value = 0;
+            document.getElementById('status').value = 'todo';
+            document.getElementById('priority').value = 'medium';
+            
+            switchView('list');
+        } catch (e) {
+            console.error("Critical Add Operational Error:", e);
+        }
+    }
+
+    function toggleTask(id) {
+        tasks = tasks.map(task => {
+            if (task.id === id) {
+                const ic = !(task.completed || task.status === 'done');
+                if(ic) expandedCardMap[id] = false;
+                return { ...task, completed: ic, status: ic ? 'done' : 'doing', progress: ic ? 100 : 50 };
+            }
+            return task;
+        });
+        saveToStorage(); renderAll();
+    }
+
+    function deleteTask(id) {
+        if(confirm(i18n[currentLang].alertDelete)) {
+            tasks = tasks.filter(task => task.id !== id);
+            delete expandedCardMap[id]; 
+            saveToStorage(); updateCategoryFilterOptions(); renderAll();
+        }
+    }
+
+    function openEditModal(id) {
+        const task = tasks.find(t => t.id === id); if(!task) return;
+        const pVal = task.progress !== undefined ? task.progress : (task.status === 'done' ? 100 : 0);
+        document.getElementById('editId').value = task.id;
+        document.getElementById('editTitle').value = task.title;
+        document.getElementById('editDesc').value = task.desc || '';
+        document.getElementById('editStatus').value = task.status;
+        document.getElementById('editPriority').value = task.priority;
+        document.getElementById('editProgress').value = pVal;
+        document.getElementById('editProgressNum').value = pVal;
+        document.getElementById('editAssignee').value = (task.assignee==='미지정'||task.assignee==='未設定'||task.assignee==='N/A') ? '' : task.assignee;
+        document.getElementById('editDueDate').value = task.dueDate;
+        document.getElementById('editUrl').value = task.url || '';
+        document.getElementById('editCategory').value = task.category;
+        document.getElementById('editColor').value = task.color || '#e2e8f0';
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+
+    function updateTaskSubmit() {
+        const id = Number(document.getElementById('editId').value);
+        const sv = document.getElementById('editStatus').value;
+        const pv = Number(document.getElementById('editProgress').value);
+
+        tasks = tasks.map(t => {
+            if(t.id === id) {
+                return {
+                    ...t, title: document.getElementById('editTitle').value, desc: document.getElementById('editDesc').value,
+                    status: sv, progress: pv, priority: document.getElementById('editPriority').value,
+                    assignee: document.getElementById('editAssignee').value || 'N/A', dueDate: document.getElementById('editDueDate').value,
+                    url: document.getElementById('editUrl').value, category: document.getElementById('editCategory').value || i18n[currentLang].defaultTag,
+                    color: document.getElementById('editColor').value, completed: sv === 'done' || pv === 100
+                };
+            }
+            return t;
+        });
+        saveToStorage(); updateCategoryFilterOptions(); renderAll(); closeEditModal();
+    }
+
+    function updateCategoryFilterOptions() {
+        const cs = document.getElementById('filterCategory'); if(!cs) return;
+        const prev = cs.value; cs.innerHTML = `<option value="all">${i18n[currentLang].statusAll}</option>`;
+        const uc = [...new Set(tasks.map(t => t.category).filter(c => c && c.trim() !== ''))];
+        uc.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; cs.appendChild(opt); });
+        if (uc.includes(prev)) cs.value = prev; else cs.value = 'all';
+    }
+
+    function updateProgress() {
+        if (tasks.length === 0) {
+            document.getElementById('progressBar').style.width = '0%'; document.getElementById('progressText').innerText = '0%'; return;
+        }
+        let sum = 0; tasks.forEach(t => { sum += t.progress !== undefined ? t.progress : ((t.completed || t.status === 'done') ? 100 : 0); });
+        const pct = Math.round(sum / tasks.length);
+        document.getElementById('progressBar').style.width = `${pct}%`; document.getElementById('progressText').innerText = `${pct}%`;
+    }
+
+    function switchView(viewType) {
+        currentViewMode = viewType;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        if(viewType === 'list') {
+            document.getElementById('btnListViewTab').classList.add('active');
+            document.getElementById('listViewSection').classList.add('active');
+            document.getElementById('calendarViewSection').classList.remove('active');
+        } else {
+            document.getElementById('btnCalViewTab').classList.add('active');
+            document.getElementById('calendarViewSection').classList.add('active');
+            document.getElementById('listViewSection').classList.remove('active');
+        }
+        renderAll();
+    }
+
+    function renderTasks() {
+        const tl = document.getElementById('taskList'); tl.innerHTML = '';
+        const aft = getFilteredTasks();
+        if (aft.length === 0) { tl.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:40px 0;">${i18n[currentLang].txtNoCard}</div>`; return; }
+
+        const sorted = [...aft].sort((a, b) => (a.completed || a.status === 'done') - (b.completed || b.status === 'done'));
+        sorted.forEach(t => {
+            const card = document.createElement('div');
+            const ic = t.completed || t.status === 'done';
+            
+            const isExpanded = expandedCardMap[t.id] === true;
+            card.className = `task-card ${ic ? 'completed' : ''} ${isExpanded ? 'expanded' : ''}`;
+            
+            const themeColor = t.color || rgbToHex(generateCategoryColor(t.category));
+            card.style.borderLeftColor = themeColor;
+            const pVal = t.progress !== undefined ? t.progress : (ic ? 100 : 0);
+
+            let urlHTML = 'N/A';
+            if (t.url) {
+                const dUrl = t.url.length > 30 ? t.url.substring(0, 30) + '...' : t.url;
+                urlHTML = `<a href="${escapeHtml(t.url)}" target="_blank" class="task-url">${escapeHtml(dUrl)}</a>`;
+            }
+
+            const toggleButtonText = isExpanded ? i18n[currentLang].btnCollapse : i18n[currentLang].btnExpand;
+
+            card.innerHTML = `
+                <div class="checkbox-container">
+                    <input type="checkbox" class="todo-checkbox" ${ic ? 'checked' : ''} onchange="toggleTask(${t.id})">
+                </div>
+                <div class="task-content">
+                    <div class="task-header">
+                        <span class="task-title">${escapeHtml(t.title)}</span>
+                        <div class="task-meta">
+                            ${getStatusLabel(t.status)}
+                            <span class="badge badge-${t.priority}">${i18n[currentLang][t.priority] || t.priority}</span>
+                            <button class="btn-toggle-view" onclick="toggleCardExpand(${t.id})">${toggleButtonText}</button>
+                        </div>
+                    </div>
+                    
+                    <div class="collapsible-body">
+                        <div class="task-desc">${escapeHtml(t.desc)}</div>
+                        <div class="card-progress-section">
+                            <div class="mini-progress-label"><span>${i18n[currentLang].lblAssignee}</span><span>${pVal}%</span></div>
+                            <div class="mini-progress-bg"><div class="mini-progress-fill" style="width: ${pVal}%;"></div></div>
+                        </div>
+                        <div class="task-details-grid">
+                            <div class="details-item"><span>${i18n[currentLang].lblAssignee}:</span> ${escapeHtml(t.assignee)}</div>
+                            <div class="details-item"><span>${i18n[currentLang].lblPeriod}:</span> ${t.startDate || ''} ~ ${t.dueDate || 'N/A'}</div>
+                            <div class="details-item" style="grid-column: span 2;"><span>URL:</span> ${urlHTML}</div>
+                        </div>
+                    </div>
+
+                    <div class="task-footer">
+                        <div>
+                            <span>${i18n[currentLang].lblCategory}: <code class="info-tag" style="background-color: ${themeColor}">${escapeHtml(t.category)}</code></span>
+                            <span style="margin-left: 10px;">${i18n[currentLang].lblRegistered}: ${t.createdAt}</span>
+                        </div>
+                        <div class="action-btns">
+                            <button class="btn-action btn-edit" onclick="openEditModal(${t.id})">${i18n[currentLang].btnEdit}</button>
+                            <button class="btn-action btn-delete" onclick="deleteTask(${t.id})">${i18n[currentLang].btnDelete}</button>
+                        </div>
+                    </div>
+                </div>`;
+                
+            if(!ic) { card.querySelector('.collapsible-body').style.display = 'block'; }
+            tl.appendChild(card);
+        });
+    }
+
+    function moveMonth(offset) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offset); renderCalendar(); }
+
+    function renderCalendar() {
+        const grid = document.getElementById('calendarGridBody'); const ta = document.getElementById('calendarMonthTitle');
+        if(!grid) return; grid.innerHTML = '';
+        const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
+        ta.innerText = currentLang === 'en' ? currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : `${year}년 ${(month + 1).toString().padStart(2, '0')}월`;
+
+        i18n[currentLang].weekdays.forEach(d => {
+            const label = document.createElement('div'); label.className = 'calendar-weekday'; label.innerText = d; grid.appendChild(label);
+        });
+
+        const fdi = new Date(year, month, 1).getDay(), ld = new Date(year, month + 1, 0).getDate(), pld = new Date(year, month, 0).getDate();
+        let days = [];
+        for(let i = fdi; i > 0; i--) { days.push({ dayNum: pld - i + 1, cm: false, dateObj: new Date(year, month - 1, pld - i + 1) }); }
+        for(let day = 1; day <= ld; day++) { days.push({ dayNum: day, cm: true, dateObj: new Date(year, month, day) }); }
+        const rCells = 42 - days.length;
+        for(let i = 1; i <= rCells; i++) { days.push({ dayNum: i, cm: false, dateObj: new Date(year, month + 1, i) }); }
+
+        const aft = getFilteredTasks().filter(t => t.dueDate);
+        aft.sort((a,b) => (new Date(b.dueDate).getTime() - new Date(b.startDate).getTime()) - (new Date(a.dueDate).getTime() - new Date(a.startDate).getTime()));
+
+        let tracks = {}; let doms = [];
+        days.forEach(c => {
+            const cell = document.createElement('div'); cell.className = `calendar-cell ${!c.cm ? 'other-month' : ''}`;
+            cell.innerHTML = `<div class="cell-number">${c.dayNum}</div>`; doms.push(cell);
+        });
+
+        days.forEach((c, dayIndex) => {
+            const cld = new Date(c.dateObj); cld.setHours(0,0,0,0);
+            let lvl = 0;
+            aft.forEach(task => {
+                const s = new Date(task.startDate), e = new Date(task.dueDate); s.setHours(0,0,0,0); e.setHours(0,0,0,0);
+                if (cld >= s && cld <= e) {
+                    if (tracks[task.id] === undefined) tracks[task.id] = lvl;
+                    while (lvl < tracks[task.id]) {
+                        const spacer = document.createElement('div'); spacer.className = 'calendar-spacer-block';
+                        doms[dayIndex].appendChild(spacer); lvl++;
+                    }
+                    const block = document.createElement('div'); block.className = `calendar-item-block`;
+                    const tc = task.color || rgbToHex(generateCategoryColor(task.category));
+                    block.style.backgroundColor = tc;
+                    if (cld.getTime() === s.getTime()) block.classList.add('bar-start');
+                    if (cld.getTime() === e.getTime()) block.classList.add('bar-end');
+                    const p = task.progress !== undefined ? task.progress : (task.status === 'done' ? 100 : 0);
+                    if(task.status === 'done') block.style.textDecoration = 'line-through';
+
+                    if (cld.getTime() === s.getTime() || cld.getDay() === 0 || dayIndex === 0) block.innerText = `(${p}%) ${task.title}`;
+                    else block.innerText = " ";
+                    block.onclick = (ev) => { ev.stopPropagation(); openEditModal(task.id); };
+                    doms[dayIndex].appendChild(block); lvl++;
+                }
+            });
+        });
+        doms.forEach(node => grid.appendChild(node));
+    }
+
+    function exportToCSV() {
+        if (tasks.length === 0) { alert(i18n[currentLang].alertNoData); return; }
+        let csv = "\uFEFF"; csv += "ID,TITLE,DESC,STATUS,PROGRESS,ASSIGNEE,START,DUE,URL,PRIORITY,CATEGORY,COLOR,COMPLETED,CREATED\n";
+        tasks.forEach(t => {
+            const p = t.progress !== undefined ? t.progress : ((t.completed || t.status === 'done') ? 100 : 0);
+            csv += [t.id, `"${t.title.replace(/"/g, '""')}"`, `"${(t.desc || '').replace(/"/g, '""')}"`, t.status, p, `"${(t.assignee || '').replace(/"/g, '""')}"`, t.startDate||'', t.dueDate, `"${(t.url || '').replace(/"/g, '""')}"`, t.priority, `"${t.category.replace(/"/g, '""')}"`, t.color||'#e2e8f0', t.completed?"Y":"N", `"${t.createdAt}"`].join(",") + "\n";
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", `global_task_backup_${new Date().toISOString().slice(0,10)}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    function importFromCSV(e) {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const lines = evt.target.result.split('\n'); if (lines.length <= 1) return;
+            let arr = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim(); if (!line) continue;
+                const m = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+                if (m.length >= 13) {
+                    const clean = val => val ? val.replace(/^"|"$/g, '').replace(/""/g, '"') : '';
+                    const sv = clean(m[3]) || 'todo'; const pv = Number(clean(m[4])) || 0;
+                    arr.push({
+                        id: Number(clean(m[0])) || Date.now() + i, title: clean(m[1]), desc: clean(m[2]), status: sv, progress: pv, assignee: clean(m[5]) || 'N/A', startDate: clean(m[6]) || new Date().toISOString().split('T')[0], dueDate: clean(m[7]) || '', url: clean(m[8]), priority: clean(m[9]) || 'medium', category: clean(m[10]) || 'General', color: clean(m[11]) || '#e2e8f0', completed: clean(m[12]) === "Y" || sv === 'done' || pv === 100, createdAt: clean(m[13]) || new Date().toLocaleDateString()
+                    });
+                }
+            }
+            if (arr.length > 0 && confirm(arr.length + i18n[currentLang].alertImportConfirm)) {
+                const ids = new Set(tasks.map(t => t.id));
+                arr.forEach(t => { if (!ids.has(t.id)) tasks.push(t); else { t.id = Date.now() + Math.random(); tasks.push(t); } });
+                saveToStorage(); updateCategoryFilterOptions(); renderAll();
+            }
+        };
+        reader.readAsText(file, 'UTF-8'); e.target.value = '';
+    }
+
+    function escapeHtml(t) { if(!t) return ''; return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+</script>
+</body>
+</html>
