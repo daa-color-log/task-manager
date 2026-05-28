@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -609,9 +609,9 @@
             <div class="lang-switcher-group">
                 <span class="lang-label">Lang:</span>
                 <select id="langSelect" class="lang-select" onchange="changeLanguage(this.value)">
-                    <option value="ko" selected>한국어</option>
+                    <option value="ko">한국어</option>
                     <option value="ja">日本語</option>
-                    <option value="en">English</option>
+                    <option value="en" selected>English</option>
                 </select>
             </div>
         </div>
@@ -872,7 +872,8 @@
         }
     };
 
-    let currentLang = localStorage.getItem('app_lang') || 'ko';
+    // currentLang 기본값을 'en'으로 변경
+    let currentLang = localStorage.getItem('app_lang') || 'en';
     let tasks = JSON.parse(localStorage.getItem('business_tasks')) || [];
     let currentCalendarDate = new Date(); 
     let currentViewMode = 'list';
